@@ -1,0 +1,46 @@
+FROM php:8.1-apache
+
+ARG USER_ID
+ARG GROUP_ID
+
+# Install and enable apache modules
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    \
+    &&  apt-get update \
+    &&  apt-get install -y --no-install-recommends \
+    locales apt-utils git libicu-dev g++ libpng-dev libxml2-dev libzip-dev libonig-dev libxslt-dev unzip nodejs npm wget
+
+# Install language
+RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen  \
+    &&  echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
+    &&  locale-gen
+
+# composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    &&  mv composer.phar /usr/local/bin/composer
+
+# Symfony CLI
+RUN curl -sS https://get.symfony.com/cli/installer | bash \
+    && mv /root/.symfony5/bin/symfony /usr/local/bin
+
+# Docker modules
+RUN docker-php-ext-configure \
+    intl \
+    &&  docker-php-ext-install \
+    pdo pdo_mysql opcache intl zip calendar dom mbstring gd xsl \
+    \
+    &&  pecl install apcu && docker-php-ext-enable apcu
+
+# Create user inside container to avoid permission issues
+RUN groupadd -f -g $GROUP_ID user
+RUN useradd -m -u $USER_ID -g $GROUP_ID user 
+RUN chown -R $USER_ID:$USER_ID /var/www
+
+# Define the user to run the container
+USER user
+
+# Start apache
+# CMD ["apache2-foreground"] # Replaced by docker-compose.yml CMD
+
+# Set working directory
+WORKDIR /var/www/html/

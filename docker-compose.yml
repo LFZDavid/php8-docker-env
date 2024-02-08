@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+  www:
+    build:
+      context: ./.docker/www
+      args:
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
+    container_name: www_${PROJECT_NAME}
+    depends_on:
+      - db
+    restart: unless-stopped
+    dns:
+      - 1.1.1.1
+    command: "symfony server:start"
+    volumes:
+      - ./www/:/var/www/html/
+    ports:
+      - 8000:8000
+  db:
+    container_name: db_${PROJECT_NAME}
+    image: mysql:5.7
+    restart: unless-stopped
+    volumes:
+      - ./.docker/db/mysql:/var/lib/mysql
+      - ./.docker/db/tmp:/var/tmp
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ${PROJECT_NAME}
+      MYSQL_USER: ${PROJECT_NAME}
+      MYSQL_PASSWORD: ${PROJECT_NAME}
+
+  phpmyadmin:
+    container_name: phpmyadmin_${PROJECT_NAME}
+    image: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - 8080:80
+    environment:
+        PMA_HOST: db
+        PMA_USER: root
+        PMA_PASSWORD: root
+    
+  # maildev:
+  #   container_name: wiismile_${PROJECT_NAME}
+  #   image: maildev/maildev
+  #   command: bin/maildev --web 80 --smtp 25 --hide-extensions STARTTLS
+  #   ports:
+  #       - 8081:80
