@@ -7,22 +7,22 @@ USER_ID := $(shell id -u)
 GROUP_ID := $(shell id -g)
 
 build:
-	USER_ID=$(shell id -u) GROUP_ID=$(shell id -g) PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) docker-compose build
+	USER_ID=$(shell id -u) GROUP_ID=$(shell id -g) PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) docker-compose up -d --build
 
-start:
+up:
 	USER_ID=$(shell id -u) GROUP_ID=$(shell id -g) PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) docker-compose up -d
 
-stop:
-	docker-compose down --remove-orphans
+down:
+	PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) docker-compose down --remove-orphans
 
 restart: 
-	stop start
+	PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) stop start
 
 enter:
-	docker-compose exec www bash
+	PROJECT_NAME=$(notdir $(patsubst %/,%,$(dir $(mkfile_path)))) docker-compose exec app bash
 
 composer-install:
-	docker-compose exec www composer install
+	docker-compose exec app composer install
 
 test:
-	docker-compose exec www vendor/bin/phpunit --testdox
+	docker-compose exec app vendor/bin/phpunit --testdox

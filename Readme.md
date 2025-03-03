@@ -1,7 +1,7 @@
-# PHP 8 Docker Environement
+# Docker Symfony (6) Base
 
 ## Description
-This is a base image for **PHP 8.1** projects *(Symfony 6)*. It is based on the official PHP image and includes the following:
+This is a base image for Symfony 6 projects. It is based on the official PHP image and includes the following:
 - PHP 8.1
 - git
 - libicu-dev 
@@ -32,15 +32,48 @@ This is a base image for **PHP 8.1** projects *(Symfony 6)*. It is based on the 
 
 ## Installation
 
-1. Build containers
+1. Create the project directory 
+<br>*(The name will be used as project name in `docker-compose.yml`)*
+
+2. Get Files
+    - Create a `Fork` of this project
+  <br>OR
+    - Clone
+      ```bash
+        # Get repo content
+        git clone https://github.com/LFZDavid/php8-docker-env.git <PROJECT_DIRECTORY>/
+        
+        cd <PROJECT_DIRECTORY>
+        
+        # Remove .git folder
+        rm -rf .git
+        # Create app folder
+        mkdir app
+      ```
+
+3. Build containers & run them
+
     ```bash
       make build
     ```
 
-2. Start containers
-   ```bash
-      make start
-   ```
+4. Run stack
+
+    ```bash
+      make up
+    ```
+
+5. Create a new Symfony project
+
+    ```bash
+      # Open terminal inside apache container
+      make enter
+
+      # Create a new Symfony project inside apache container (checkout symfony cli documentation)
+      # current options: --webapp --api --version=value
+      symfony new . --no-git
+    ```
+
 
 ## Command shortcuts
 
@@ -49,10 +82,10 @@ This is a base image for **PHP 8.1** projects *(Symfony 6)*. It is based on the 
 make build
 
 # Start containers (build if needed)
-make start
+make up
 
 # Stop containers
-make stop
+make down
 
 # Restart
 make restart

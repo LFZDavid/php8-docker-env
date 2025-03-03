@@ -1,22 +1,22 @@
-version: '3.3'
 services:
-  www:
+  app:
     build:
-      context: ./.docker/www
+      context: ./.docker/app
       args:
         USER_ID: ${USER_ID:-1000}
         GROUP_ID: ${GROUP_ID:-1000}
-    container_name: www_${PROJECT_NAME}
+    container_name: app_${PROJECT_NAME}
     depends_on:
       - db
     restart: unless-stopped
     dns:
       - 1.1.1.1
-    command: "symfony server:start"
+    # command: "symfony server:start"
     volumes:
-      - ./www/:/var/www/html/
+      - ./app/:/var/www/html/
+      - ./.docker/app/apache/sites-enabled:/etc/apache2/sites-enabled
     ports:
-      - 8000:8000
+      - 8000:80
   db:
     container_name: db_${PROJECT_NAME}
     image: mysql:5.7

@@ -10,6 +10,12 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     &&  apt-get install -y --no-install-recommends \
     locales apt-utils git libicu-dev g++ libpng-dev libxml2-dev libzip-dev libonig-dev libxslt-dev unzip nodejs npm wget
 
+#### Apache config
+RUN a2enmod rewrite
+
+# Ensure Apache PID file is removed on start
+RUN rm -f /var/run/apache2/apache2.pid
+
 # Install language
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen  \
     &&  echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -31,16 +37,18 @@ RUN docker-php-ext-configure \
     \
     &&  pecl install apcu && docker-php-ext-enable apcu
 
-# Create user inside container to avoid permission issues
-RUN groupadd -f -g $GROUP_ID user
-RUN useradd -m -u $USER_ID -g $GROUP_ID user 
-RUN chown -R $USER_ID:$USER_ID /var/www
+# Change user inside container to avoid permission issues
+RUN usermod -u ${USER_ID} www-data
+RUN groupmod -g ${GROUP_ID} www-data 
+RUN chown -R www-data:www-data /var/www
 
 # Define the user to run the container
-USER user
+USER www-data
+
+EXPOSE 80
 
 # Start apache
-# CMD ["apache2-foreground"] # Replaced by docker-compose.yml CMD
+CMD ["apache2-foreground"]
 
 # Set working directory
 WORKDIR /var/www/html/
